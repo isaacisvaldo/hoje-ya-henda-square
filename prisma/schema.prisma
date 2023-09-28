@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id        String   @id() @default(uuid()) @map("_id")
+  name      String
+  password  String
+  createdAt DateTime @default(now())
+  Endereco_User Endereco_User[]
+}
+
+model Enderecos {
+  id          String     @id() @default(uuid()) @map("_id")
+  name        String
+  createdAt   DateTime   @default(now())
+  latitude    Float
+  longitude   Float
+  regionID    String?
+  subRegionId String?
+  subRegion   SubRegion? @relation(fields: [subRegionId], references: [id])
+  endereco_user Endereco_User[]
+}
+
+model Endereco_User {
+  id         String     @id() @default(uuid()) @map("_id")
+  enderecos  Enderecos? @relation(fields: [enderecoId], references: [id])
+  enderecoId String
+  users      Users?     @relation(fields: [usersId], references: [id])
+  usersId    String
+  estado String
+}
+
+model Market {
+  id          String           @id() @default(uuid()) @map("_id")
+  name        String
+  location    LocationCurrency
+  region      RegionType?
+  regionID    String?
+  subRegionId String?
+  subRegion   SubRegion?       @relation(fields: [subRegionId], references: [id])
+  createdAt   DateTime         @default(now())
+}
+
+model Region {
+  id               String      @id @default(uuid()) @map("_id")
+  name             String
+  coord            Coord[]
+  Country          String?
+  Continent        String
+  latitudeCentral  Int
+  longitudeCentral Int
+  createdAt        DateTime    @default(now())
+  subRegions       SubRegion[]
+}
+
+model SubRegion {
+  id        String      @id @default(uuid()) @map("_id")
+  name      String
+  coord     Coord[]
+  createdAt DateTime    @default(now())
+  regionId  String
+  region    Region      @relation(fields: [regionId], references: [id])
+  markets   Market[]
+  Enderecos Enderecos[]
+}
+
+type Coord {
+  latitude  Decimal
+  longitude Decimal
+}
+
+type LocationCurrency {
+  latitude  Decimal
+  longitude Decimal
+}
+
+type RegionType {
+  name    String
+  address Coord?
+}
